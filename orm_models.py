@@ -2,8 +2,10 @@ import sqlalchemy as sq
 import datetime as dt
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-engine = sq.create_engine('postgresql://postgres:postgres@localhost:5432/orm')
+engine = sq.create_engine('postgresql://postgres:01082210@localhost:5432/orm')
 
+Session = sessionmaker(bind=engine)
+session = Session()
 Base = declarative_base()
 
 
@@ -13,8 +15,6 @@ class Publisher(Base):
     publisher_id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=30), nullable=False)
 
-    books = relationship('Book', back_populates='publisher')
-
 
 class Book(Base):
     __tablename__ = 'book'
@@ -23,7 +23,7 @@ class Book(Base):
     title = sq.Column(sq.Text, nullable=False)
     publisher_id = sq.Column(sq.Integer, sq.ForeignKey('publisher.publisher_id', ondelete='CASCADE'))
 
-    publisher = relationship('Publisher', back_populates='books')
+    author = relationship('Publisher', backref='book')
     book_count = relationship('Stock', backref='stock')
 
 
@@ -44,16 +44,19 @@ class Stock(Base):
     shop_id = sq.Column(sq.Integer, sq.ForeignKey('shop.shop_id'), ondelete='CASCADE')
     count = sq.Column(sq.Integer, nullable=False)
 
-    stock_sale = relationship('Shop', back_populates='sale_stock')
-
 
 class Sale(Base):
     __tablename__ = 'sale'
 
     sale_id = sq.Column(sq.Integer, primary_key=True)
-    price = sq.Column(sq.Integer, nullable=False)
+    price = sq.Column(sq.Numeric, nullable=False)
     stock_id = sq.Column(sq.Integer, sq.ForeignKey('stock.stock_id', ondelete='CASCADE'))
     date_sale = sq.Column(sq.Date, default=dt.date.today)
     count = sq.Column(sq.Integer, nullable=False)
 
     sale_stock = relationship('Stock', back_populates='stock_sale')
+
+
+def create_tables(engine):
+    #Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
