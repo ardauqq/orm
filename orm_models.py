@@ -1,11 +1,8 @@
 import sqlalchemy as sq
 import datetime as dt
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, relationship
 
-engine = sq.create_engine('postgresql://postgres:01082210@localhost:5432/orm')
 
-Session = sessionmaker(bind=engine)
-session = Session()
 Base = declarative_base()
 
 
